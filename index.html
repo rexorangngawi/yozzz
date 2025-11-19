@@ -1,0 +1,458 @@
+<!doctype html>
+<html lang="id">
+<head>
+<link rel="icon" type="image/svg+xml" href="favicon.svg" />
+<link rel="alternate icon" href="favicon.ico" />
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Yozzz AI — Get Started</title>
+<style>
+  :root{
+    --accent-a:#ff5ca8;
+    --accent-b:#6c6cff;
+    --bg:#020617;
+    --muted: rgba(255,255,255,0.78);
+    --card: rgba(255,255,255,0.03);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{
+    font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial;
+    background:var(--bg);
+    color:white;
+    -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+    margin:0;
+  }
+
+  video.bg{
+    position:fixed;inset:0;width:100%;height:100%;object-fit:cover;
+    opacity:0;transform:scale(1.03);
+    transition:opacity .6s cubic-bezier(.2,.9,.2,1), transform .6s cubic-bezier(.2,.9,.2,1), filter .18s ease;
+    z-index:0;filter:none;background:#000;
+  }
+  video.bg.active{opacity:1;transform:scale(1);}
+
+  .wrap{min-height:100vh;position:relative;z-index:8;padding-bottom:120px}
+  .ui-shell{position:relative;z-index:12;padding:20px;max-width:1200px;margin:0 auto;display:block}
+
+  .brand{display:flex;align-items:center;gap:12px;margin-bottom:6px}
+  img.logo{
+    width:46px;height:46px;border-radius:10px;object-fit:cover;display:block;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.35);
+  }
+
+  h1{font-size:2.2rem;line-height:1;margin:6px 0 6px 0;background:linear-gradient(90deg,var(--accent-a),var(--accent-b));-webkit-background-clip:text;color:transparent}
+  p.lead{color:rgba(255,255,255,0.9);max-width:70ch;margin-bottom:12px}
+
+  .container{display:grid;grid-template-columns:1fr 360px;gap:28px;align-items:start;padding:12px 20px}
+  @media (max-width:980px){ .container{grid-template-columns:1fr;padding:12px 16px;gap:18px} }
+  .left { padding-right:6px }
+  .right { position:sticky; top:24px; align-self:start }
+
+  .btn-main{
+    display:inline-block;background:linear-gradient(90deg,var(--accent-a),var(--accent-b));
+    color:#021;font-weight:800;padding:12px 22px;border:none;border-radius:12px;
+    cursor:pointer;font-size:1.05rem;box-shadow:0 12px 36px rgba(108,108,255,0.08);
+    transition:transform .16s ease, box-shadow .16s;margin:12px 0;
+  }
+  .btn-main:hover{transform:translateY(-3px)}
+  .btn-main:active{transform:translateY(1px)}
+
+  .features-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:18px}
+  @media (max-width:640px){ .features-grid{grid-template-columns:repeat(1,1fr)} }
+  .feat{padding:12px;border-radius:12px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.03)}
+  .feat h4{margin-bottom:8px;font-size:1rem}
+  .feat p{color:rgba(255,255,255,0.78);font-size:14px}
+
+  .card{background:var(--card);padding:14px;border-radius:12px;border:1px solid rgba(255,255,255,0.04);display:flex;flex-direction:column;gap:10px}
+  .top-row{display:flex;align-items:center;justify-content:space-between;gap:8px}
+  .uptime{font-size:1.4rem;font-weight:800;display:flex;align-items:baseline;gap:8px}
+  .uptime .val{font-variant-numeric:tabular-nums}
+
+  .latency-block{display:flex;flex-direction:column;align-items:flex-end}
+  .latency-label{font-size:12px;color:rgba(255,255,255,0.7)}
+  .latency-val{font-weight:700;font-size:1.05rem}
+
+  .monitor-area{width:100%;display:flex;flex-direction:column;gap:6px}
+  .canvas-wrap{width:100%;height:64px;border-radius:8px;overflow:hidden}
+  canvas#sparkCanvas{width:100%;height:100%;display:block;background:transparent}
+
+  .activity-area{max-width:1200px;margin:18px auto 80px;padding:12px 20px;z-index:12}
+  .activity-wrap{background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.008));border-radius:12px;padding:12px;border:1px solid rgba(255,255,255,0.03)}
+  .activity-list{display:flex;flex-direction:column;gap:8px;max-height:340px;overflow:auto;padding-right:8px}
+  .act-item{display:flex;gap:10px;align-items:center;padding:8px;border-radius:8px;background:transparent}
+  .act-dot{width:10px;height:10px;border-radius:999px;background:var(--accent-b);flex-shrink:0}
+  .act-text{color:rgba(255,255,255,0.9);font-size:14px}
+  .act-time{margin-left:auto;color:rgba(255,255,255,0.45);font-size:12px}
+
+  body.loading video.bg, body.loading .ui-shell, body.loading .activity-area { filter: blur(8px) saturate(.95); -webkit-filter: blur(8px) saturate(.95) }
+
+  body.only-video .ui-shell,
+  body.only-video .activity-area,
+  body.only-video footer.sitefoot,
+  body.only-video #loadingSpinner,
+  body.only-video .btn-main,
+  body.only-video #sparkCanvas,
+  body.only-video #enableSound { display: none !important; visibility: hidden !important; opacity: 0 !important; pointer-events: none !important; }
+  #loadingSpinner{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);width:72px;height:72px;z-index:9999;display:none;pointer-events:none}
+  #loadingSpinner.show{display:block}
+  .spinner-svg{width:100%;height:100%}
+  .spinner-rotate{transform-origin:50% 50%;animation:rotate 1.6s cubic-bezier(.22,.8,.2,1) infinite}
+  .spinner-circle{stroke:rgba(255,255,255,0.98);stroke-width:4;stroke-linecap:round;fill:none;stroke-dasharray:140;stroke-dashoffset:120;animation:dash 1.6s cubic-bezier(.22,.8,.2,1) infinite}
+  @keyframes rotate{0%{transform:rotate(0)}50%{transform:rotate(180deg)}100%{transform:rotate(360deg)}}
+  @keyframes dash{0%{stroke-dashoffset:140;stroke-dasharray:8 140}50%{stroke-dashoffset:40;stroke-dasharray:92 140}100%{stroke-dashoffset:140;stroke-dasharray:8 140}}
+  #enableSound{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:linear-gradient(90deg,var(--accent-a),var(--accent-b));border:none;padding:10px 14px;border-radius:999px;font-weight:800;color:#021;display:none;z-index:120;box-shadow:0 12px 36px rgba(108,108,255,0.12)}
+  #enableSound.show{display:block;visibility:visible;opacity:1}
+
+  footer.sitefoot{position:fixed;left:0;right:0;bottom:0;background:rgba(2,6,23,0.92);text-align:center;padding:10px 8px;color:rgba(255,255,255,0.85);font-size:14px;z-index:110}
+  footer.sitefoot .inner{max-width:1200px;margin:0 auto;}
+
+  @media (max-width:640px){
+    .container{grid-template-columns:1fr;padding:12px}
+    .right{position:relative;top:0}
+    .activity-area{padding:10px}
+    .uptime{font-size:1.1rem}
+    h1{font-size:1.4rem}
+    .canvas-wrap{height:48px}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <video id="bgVideo" class="bg" loop playsinline preload="auto">
+    <source src="video.mp4" type="video/mp4">
+  </video>
+
+  <div id="loadingSpinner" role="status" aria-live="polite" aria-hidden="true">
+    <svg class="spinner-svg" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <g class="spinner-rotate">
+        <circle cx="24" cy="24" r="18" stroke="rgba(255,255,255,0.06)" stroke-width="4" fill="none"/>
+        <circle class="spinner-circle" cx="24" cy="24" r="18"/>
+      </g>
+    </svg>
+  </div>
+
+  <button id="enableSound" aria-hidden="true">Enable Sound</button>
+
+  <div class="ui-shell" id="uiShell">
+    <div class="brand">
+      <img class="logo" src="https://c.termai.cc/i62/UorscR.jpg" alt="Logo Yozzz AI" />
+      <div>
+        <div style="font-weight:800">Yozzz AI</div>
+        <div style="font-size:13px;color:rgba(255,255,255,0.75)">Get started · AI · Free</div>
+      </div>
+    </div>
+
+    <div class="container">
+      <div class="left">
+        <h1>Yozzz AI</h1>
+        <p class="lead">AI yang siap bantu kamu kerja cepat: prompt tegas, ringkasan instan, image gen, dan workflow otomatis. Tekan tombol untuk langsung immersive.</p>
+
+        <div>
+          <button id="startBtn" class="btn-main" aria-label="Get Started">Get Started</button>
+        </div>
+
+        <div class="features-grid" aria-hidden="true">
+          <div class="feat"><h4>Fast Prompts</h4><p>Optimasi prompt sehingga output lebih relevan dan konsisten.</p></div>
+          <div class="feat"><h4>Auto Summary</h4><p>Ringkasan otomatis yang bisa langsung dipakai untuk briefing.</p></div>
+          <div class="feat"><h4>Image Forge</h4><p>Generate ilustrasi dari teks dalam hitungan detik.</p></div>
+          <div class="feat"><h4>Workflows</h4><p>Otomasi tugas berulang supaya kamu fokus pada keputusan penting.</p></div>
+        </div>
+      </div>
+
+      <aside class="right" aria-hidden="true">
+        <div class="card">
+          <div class="top-row">
+            <div>
+              <div style="font-size:13px;color:rgba(255,255,255,0.76)">Uptime</div>
+              <div class="uptime"><div class="val" id="uptimeVal">99.92%</div><div style="font-size:13px;color:rgba(255,255,255,0.7);margin-left:6px"> live</div></div>
+            </div>
+
+            <div class="latency-block">
+              <div class="latency-label">Latency</div>
+              <div class="latency-val" id="latencyEl">— ms</div>
+            </div>
+          </div>
+
+          <div class="monitor-area" aria-hidden="true">
+            <div class="canvas-wrap">
+              <canvas id="sparkCanvas" aria-hidden="true"></canvas>
+            </div>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </div>
+
+  <div class="activity-area" id="activityArea">
+    <div class="activity-wrap">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+        <div style="font-weight:700">Live activity</div>
+        <div style="font-size:13px;color:rgba(255,255,255,0.65)"></div>
+      </div>
+      <div class="activity-list" id="activityList" aria-live="polite">
+        <div class="act-item"><div class="act-dot" style="background:#60a5fa"></div><div class="act-text">@andi generated an image</div><div class="act-time">2m</div></div>
+        <div class="act-item"><div class="act-dot" style="background:#34d399"></div><div class="act-text">Template "Launch Kit" used</div><div class="act-time">8m</div></div>
+        <div class="act-item"><div class="act-dot" style="background:#f472b6"></div><div class="act-text">Auto-summary completed for report.pdf</div><div class="act-time">12m</div></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<footer class="sitefoot"><div class="inner">© 2025 -- Yozzz AI</div></footer>
+
+<script>
+  const bgVideo = document.getElementById('bgVideo');
+  const loadingSpinner = document.getElementById('loadingSpinner');
+  const enableSound = document.getElementById('enableSound');
+  const startBtn = document.getElementById('startBtn');
+  const uptimeEl = document.getElementById('uptimeVal');
+  const activityList = document.getElementById('activityList');
+  const latencyEl = document.getElementById('latencyEl');
+  const canvas = document.getElementById('sparkCanvas');
+  const ctx = canvas.getContext('2d');
+
+  function resizeCanvasToDisplaySize() {
+    const dpr = window.devicePixelRatio || 1;
+    const rect = canvas.getBoundingClientRect();
+    const w = Math.max(320, Math.floor(rect.width));
+    const h = Math.max(40, Math.floor(rect.height));
+    canvas.width = Math.round(w * dpr);
+    canvas.height = Math.round(h * dpr);
+    canvas.style.width = w + 'px';
+    canvas.style.height = h + 'px';
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    return { w, h, dpr };
+  }
+
+  const samples = [];
+  const MAX_SAMPLES = 100;
+
+  function valueToY(v, h, padding=6){
+    const min = 97.0, max = 100.0;
+    const clamped = Math.max(min, Math.min(max, v));
+    const ratio = (clamped - min) / (max - min);
+    return padding + (1 - ratio) * (h - padding*2);
+  }
+
+  function drawSparklineFull(clipRatio = 1){
+    const { w, h } = resizeCanvasToDisplaySize();
+    const width = w, height = h;
+    ctx.clearRect(0,0,width,height);
+    if(samples.length === 0) return;
+    const N = Math.min(samples.length, MAX_SAMPLES);
+    const pad = Math.max(0, MAX_SAMPLES - N);
+    const step = width / Math.max(1, (MAX_SAMPLES - 1));
+    const pts = [];
+    for(let i=0;i<N;i++){
+      const x = Math.round((pad + i) * step);
+      const y = valueToY(samples[samples.length - N + i], height);
+      pts.push({x,y});
+    }
+
+    ctx.save();
+    ctx.beginPath();
+    const clipWidth = width * clipRatio;
+    ctx.rect(0,0,clipWidth,height);
+    ctx.clip();
+
+    if(pts.length){
+      ctx.moveTo(pts[0].x, pts[0].y);
+      for(let i=1;i<pts.length;i++) ctx.lineTo(pts[i].x, pts[i].y);
+      ctx.lineTo(pts[pts.length-1].x, height);
+      ctx.lineTo(pts[0].x, height);
+      ctx.closePath();
+      const g = ctx.createLinearGradient(0,0,0,height);
+      g.addColorStop(0, 'rgba(108,108,255,0.12)');
+      g.addColorStop(1, 'rgba(108,108,255,0.02)');
+      ctx.fillStyle = g;
+      ctx.fill();
+    }
+    ctx.restore();
+
+    if(pts.length){
+      ctx.beginPath();
+      ctx.lineJoin = 'round';
+      ctx.lineCap = 'round';
+      ctx.moveTo(pts[0].x, pts[0].y);
+      for(let i=1;i<pts.length;i++) ctx.lineTo(pts[i].x, pts[i].y);
+      ctx.strokeStyle = 'rgba(108,108,255,0.95)';
+      ctx.lineWidth = 2;
+      ctx.save();
+      ctx.rect(0,0,clipWidth,height);
+      ctx.clip();
+      ctx.stroke();
+      ctx.restore();
+    }
+  }
+
+  function animateDraw(){
+    const duration = 450;
+    const start = performance.now();
+    function frame(t){
+      const p = Math.min(1,(t-start)/duration);
+      const ease = p<0.5 ? 2*p*p : -1 + (4 - 2*p)*p;
+      drawSparklineFull(ease);
+      if(p < 1) requestAnimationFrame(frame);
+    }
+    requestAnimationFrame(frame);
+  }
+
+  (function animateUptime(){
+    if(!uptimeEl) return;
+    let current = 99.92;
+    uptimeEl.textContent = current.toFixed(2) + '%';
+    for(let i=0;i<12;i++) samples.push(99.8 + (Math.random()-0.5)*0.2);
+    drawSparklineFull(1);
+
+    function next(){
+      const delta = (Math.random()*0.14) - 0.07;
+      const target = Math.min(99.999, Math.max(97.00, current + delta));
+      const duration = 900 + Math.random()*800;
+      const start = performance.now();
+      const from = current;
+      function step(t){
+        const p = Math.min(1, (t-start)/duration);
+        const ease = p<0.5 ? 2*p*p : -1 + (4 - 2*p)*p;
+        current = from + (target - from) * ease;
+        uptimeEl.textContent = current.toFixed(2) + '%';
+        samples.push(current);
+        if(samples.length > MAX_SAMPLES) samples.shift();
+        animateDraw();
+        if(p < 1) requestAnimationFrame(step);
+        else setTimeout(next, 800 + Math.random()*1200);
+      }
+      requestAnimationFrame(step);
+    }
+    setTimeout(next, 800 + Math.random()*400);
+  })();
+
+  (function animateLatency(){
+    if(!latencyEl) return;
+    let current = 18;
+    latencyEl.textContent = `${current} ms`;
+    function nextTarget(){
+      const target = Math.floor(10 + Math.random()*21);
+      const duration = 700 + Math.random()*900;
+      const start = performance.now();
+      const from = current;
+      function step(t){
+        const p = Math.min(1,(t-start)/duration);
+        const ease = p<0.5 ? 2*p*p : -1 + (4 - 2*p)*p;
+        current = from + (target - from) * ease;
+        latencyEl.textContent = `${Math.round(current)} ms`;
+        if(p < 1) requestAnimationFrame(step);
+        else setTimeout(nextTarget, 500 + Math.random()*1200);
+      }
+      requestAnimationFrame(step);
+    }
+    setTimeout(nextTarget, 400);
+  })();
+
+  function showSpinner(){ document.body.classList.add('loading'); loadingSpinner.classList.add('show'); loadingSpinner.setAttribute('aria-hidden','false'); }
+  function hideSpinner(){ loadingSpinner.classList.remove('show'); loadingSpinner.setAttribute('aria-hidden','true'); document.body.classList.remove('loading'); }
+
+  async function startVideoFlow(){
+    try {
+      showSpinner();
+      await new Promise(r => setTimeout(r, 500));
+      hideSpinner();
+
+      document.body.classList.add('only-video');
+      enableSound.classList.remove('show');
+      enableSound.setAttribute('aria-hidden','true');
+
+      bgVideo.classList.add('active');
+      bgVideo.currentTime = 0;
+      bgVideo.muted = false;
+      try {
+        await bgVideo.play();
+      } catch (err) {
+        bgVideo.muted = true;
+        try {
+          await bgVideo.play();
+          enableSound.classList.add('show');
+          enableSound.setAttribute('aria-hidden','false');
+          enableSound.style.zIndex = 99999;
+        } catch (err2) {
+          console.error('Video play failed:', err2);
+          document.body.classList.remove('only-video');
+          alert('Gagal memutar video. Periksa file/video path atau koneksi.');
+        }
+      }
+    } catch(e){
+      console.error(e);
+    }
+  }
+
+  startBtn.addEventListener('click', startVideoFlow);
+
+  enableSound.addEventListener('click', async () => {
+    try {
+      bgVideo.muted = false;
+      await bgVideo.play();
+      enableSound.classList.remove('show');
+      enableSound.setAttribute('aria-hidden','true');
+    } catch(err){
+      console.warn('Enable sound failed:', err);
+    }
+  });
+
+  (function activitySimulator(){
+    const sampleActions = [
+      username => `${username} generated an image`,
+      username => `Workflow "${['Newsletter','Onboard','Digest'][Math.floor(Math.random()*3)]}" executed`,
+      username => `Auto-summary completed for ${['report.pdf','notes.md','slides.pptx'][Math.floor(Math.random()*3)]}`,
+      username => `Template "${['Launch Kit','Social Pack','Ad Copy'][Math.floor(Math.random()*3)]}" used`,
+      username => `${username} exported results`
+    ];
+    const sampleUsers = ['@andi','@sari','@irfan','@alya','@budi','@rina','@rio','@lisa'];
+
+    function addActivity(text){
+      const item = document.createElement('div');
+      item.className = 'act-item';
+      const color = ['#60a5fa','#34d399','#f472b6','#f59e0b'][Math.floor(Math.random()*4)];
+      item.innerHTML = `<div class="act-dot" style="background:${color}"></div>
+                        <div class="act-text">${text}</div>
+                        <div class="act-time">just now</div>`;
+      activityList.prepend(item);
+      while(activityList.children.length > 120) activityList.removeChild(activityList.lastChild);
+    }
+
+    function scheduleNext(){
+      const ms = 60_000 + Math.floor(Math.random() * 240_000);
+      setTimeout(() => {
+        const user = sampleUsers[Math.floor(Math.random()*sampleUsers.length)];
+        const action = sampleActions[Math.floor(Math.random()*sampleActions.length)];
+        addActivity(action(user));
+        Array.from(activityList.children).forEach((child, idx) => {
+          const timeEl = child.querySelector('.act-time');
+          if(!timeEl) return;
+          if(idx === 0) timeEl.textContent = 'just now';
+          else {
+            const mins = Math.min(59, Math.floor(Math.random()*30) + 1);
+            timeEl.textContent = `${mins}m`;
+          }
+        });
+        scheduleNext();
+      }, ms);
+    }
+
+    setTimeout(scheduleNext, 12_000);
+  })();
+
+  document.addEventListener('keydown', (e) => { if(e.key.toLowerCase() === 'g') startVideoFlow(); });
+  document.addEventListener('visibilitychange', () => {
+    if(document.hidden) bgVideo.pause();
+    else if(document.body.classList.contains('only-video')) bgVideo.play().catch(()=>{});
+  });
+
+  window.addEventListener('resize', () => { drawSparklineFull(1); });
+  window.addEventListener('load', () => { drawSparklineFull(1); });
+
+</script>
+</body>
+</html>
